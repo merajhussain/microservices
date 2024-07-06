@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.UUID;
 
@@ -20,10 +21,15 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+  WebClient webClient;
+
     public void placeOrder(OrderRequest orderRequest){
 
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
+
+
 
         var itemnsList=orderRequest.getItems()
                 .stream()
@@ -32,11 +38,20 @@ public class OrderService {
 
      order.setItems(itemnsList);
 
-     try{
-         orderRepository.save(order);
-     }catch (Exception e){
+        Boolean result= webClient.get()
+                .uri("http://localhost:8082/api/inventory/12345")
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
+        if(result){
+            try{
+                orderRepository.save(order);
+            }catch (Exception e){
                 log.error("Error saving order");
-     }
+            }
+        }
+
+
 
 
     }

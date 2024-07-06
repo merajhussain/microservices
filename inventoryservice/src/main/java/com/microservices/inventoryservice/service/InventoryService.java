@@ -3,6 +3,7 @@ package com.microservices.inventoryservice.service;
 import com.microservices.inventoryservice.InventoryRepository;
 import com.microservices.inventoryservice.model.Inventory;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,11 @@ public class InventoryService {
          inventoryRepository.save(inventory);
 
 
+    }
+
+    @PreDestroy
+    void clearData(){
+        inventoryRepository.deleteAll();
     }
 
     @Transactional
